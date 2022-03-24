@@ -190,7 +190,7 @@ member.username.like("member%") //like 검색 member.username.contains("member")
 
 #### 집합
 
-##### 집합 함수
+#####  집합 함수
 
 - count(): 계수 함수
 - sum(): 조회된 모든 단일 컬럼의 총합을 구하는 함수
@@ -199,3 +199,32 @@ member.username.like("member%") //like 검색 member.username.contains("member")
 - min(): 조회된 모든 단일 컬럼 중 최하위값을 구하는 함수
 - groupBy(): 파라미터를 기준으로 그룹화
 - having(): 그룹화후에 조건 처리
+
+
+
+### 조인 - 기본 조인
+
+#### 기본 조인
+
+조인의 기본 문법은 첫번째 파라미터에 조인 대상을 지정하고, 두번째 파라미터에 별칭(alias)으로 사용할 Q타입을 지정하면 된다.
+
+~~~java
+join(조인 대상, 별칭으로 사용할 Q타입)
+~~~
+
+
+
+#### 세타 조인
+
+연관관계가 없는 필드로 조인
+
+~~~java
+List<Member> result = queryFactory
+                .select(member)
+                .from(member, team)
+                .where(member.username.eq(team.name))
+                .fetch();
+~~~
+
+- From 절에 여러 엔티티를 선택해서 세타 조인
+- on을 사용하면 외부 조인 가능
