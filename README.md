@@ -168,3 +168,20 @@ member.username.like("member%") //like 검색 member.username.contains("member")
 - `fetchFirst()`: `limit(1).fetchOne()`
 - `fetchResults()`: 페이징 정보 포함, total count 쿼리 추가 실행
 - `fetchCount()`: count 쿼리로 변경해서 count 수 조회
+
+
+
+#### 정렬
+
+- orderBy(): 정렬 메소드
+
+  - 정렬하고 싶은 필드를 파라미터로 넘기면 된다
+
+  - ex) `.orderBy(member.age.desc())`
+
+    ​	  `.orderBy(member.age.asc())`
+
+#### 페이징
+
+- offset(): 데이터를 몇번부터 가져올지 설정한다.
+- limit(): 데이터를 offset으로부터 몇개를 가져올지 정한다.
