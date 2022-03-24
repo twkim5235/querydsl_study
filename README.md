@@ -185,3 +185,17 @@ member.username.like("member%") //like 검색 member.username.contains("member")
 
 - offset(): 데이터를 몇번부터 가져올지 설정한다.
 - limit(): 데이터를 offset으로부터 몇개를 가져올지 정한다.
+
+
+
+#### 집합
+
+##### 집합 함수
+
+- count(): 계수 함수
+- sum(): 조회된 모든 단일 컬럼의 총합을 구하는 함수
+- avg(): 조회된 모든  단일 컬럼의 평균을 구하는 함수
+- max(): 조회된 모든 단일 컬럼 중 최상위값을 구하는 함수
+- min(): 조회된 모든 단일 컬럼 중 최하위값을 구하는 함수
+- groupBy(): 파라미터를 기준으로 그룹화
+- having(): 그룹화후에 조건 처리
