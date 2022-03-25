@@ -228,3 +228,97 @@ List<Member> result = queryFactory
 
 - From 절에 여러 엔티티를 선택해서 세타 조인
 - on을 사용하면 외부 조인 가능
+
+
+
+### 조인 - on 절
+
+- ON절을 활용한 조인(JPA 2.1 부터 지원)
+  1. 조인 대상 필터링
+  2. 연관관계가 없는 엔티티 외부 조인
+
+
+
+1. 조인 대상 필터링
+
+~~~java
+List<Tuple> result = queryFactory
+                .select(member, team)
+                .from(member)
+                .leftJoin(member.team, team).on(team.name.eq("teamA"))
+                .fetch();
+~~~
+
+
+
+> 참고: ineer join을 할때 on으로 조건을 거나, where로 조건을 걸어도 똑같다. 내부 조인일때는 익숙한 where을 사용하고. on절은 외부조인이 필요한 경우에만 사용하자
+
+```java
+//동일한 결과가 출력됨
+
+List<Tuple> result = queryFactory
+        .select(member, team)
+        .from(member)
+        .join(member.team, team).on(team.name.eq("teamA"))
+        .fetch();
+
+List<Tuple> result = queryFactory
+        .select(member, team)
+        .from(member)
+        .join(member.team, team)
+  			.where(team.name.eq("teamA"))
+        .fetch();
+```
+
+
+
+2. 연관관계가 없는 엔티티 외부 조인
+
+```java
+public void joinOnNoRelation() throws Exception{
+    em.persist(new Member("teamA"));
+    em.persist(new Member("teamB"));
+    em.persist(new Member("teamC"));
+
+    List<Tuple> result = queryFactory
+            .select(member, team)
+            .from(member)
+            .leftJoin(team).on(member.username.eq(team.name))
+            .fetch();
+
+    for (Tuple tuple : result) {
+        System.out.println("tuple = " + tuple);
+    }
+}
+```
+
+- 하이버네이트 5.1 부터 `on` 을 사용해서 서로 관계가 없는 필드로 외부 조인하는 기능이 추가되었다. 물론 내부 조인도 가능하다.
+- 문법을 잘 봐야 한다. **leftJoin()** 부분에 일반 조인과 다르게 엔티티 하나만 들어간다.
+  - 일반 조인: `leftJoin(member.team, team)` 
+  - on 조인: `leftJoin(team).on(조건)`
+    - 일반 조인은 fk를 기준으로 조인을 하나, 연관관계가 없는 조인은 on절의 조건에 맞추어서 조인을 한다.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
