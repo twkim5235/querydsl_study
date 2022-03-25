@@ -422,13 +422,48 @@ public void complexCase() {
 
 
 
+#### 상수, 문자 더하기
+
+상수가 필요하면 `Expressions.constant(xxx)` 사용
+
+```java
+@Test
+public void constant() throws Exception{
+    List<Tuple> result = queryFactory
+            .select(member.username, Expressions.constant("A"))
+            .from(member)
+            .fetch();
+
+    for (Tuple tuple : result) {
+        System.out.println("tuple = " + tuple);
+    }
+}
+```
 
 
 
+**문자 더하기**
+
+```java
+@Test
+public void concat() throws Exception{
+    List<String> result = queryFactory
+            .select(member.username.concat("_").concat(member.age.stringValue()))
+            .from(member)
+            .where(member.username.eq("member1"))
+            .fetch();
+
+    for (String s : result) {
+        System.out.println("s = " + s);
+    }
+}
+```
+
+h2: 2.0.202 이후 버전 부터는 char로 캐스팅할 때 기본길이가 1로 고정되어 있다.
+
+원래 결과는 member1_10로 출력되어야 한다.
 
 
 
-
-
-
+>  참고 `member.age.stringValue()` 부분이 중요한데, 문자가 아닌 다른 타입들을 `stringValue()`로 문자로 변환할 수 있따. 이 방법은 ENUM을 처리할 때도 자주 사용한다.
 
