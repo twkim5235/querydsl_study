@@ -300,6 +300,33 @@ public void joinOnNoRelation() throws Exception{
 
 
 
+#### 조인 - 페치 조인
+
+페치 조인은 SQL에서 제공하는 기능은 아니다. SQL 조인을 활용해서 연관된 엔티티를 SQL 한번에 조회하는 기능이다. 주로 성능 최적화에 사용하는 방법이다.
+
+
+
+**일반 조인 절에 .fetchJoin()만 붙여주면 된다.**
+
+~~~java
+@Test
+    public void fetchJoinUse() throws Exception{
+        em.flush();
+        em.clear();
+
+        Member findMember = queryFactory
+                .selectFrom(member)
+                .join(member.team, team).fetchJoin() 
+                .where(member.username.eq("member1"))
+                .fetchOne();
+
+        boolean loaded = emf.getPersistenceUnitUtil().isLoaded(findMember.getTeam());
+        assertThat(loaded).as("페치 조인 미적용").isTrue();
+    }
+~~~
+
+
+
 
 
 
