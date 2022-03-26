@@ -1167,6 +1167,27 @@ public class MemberController {
 
 
 
+#### 스프링 데이터 정렬(sort)
+
+스프링 데이터 JPA는 자신의 정렬(Sort)을 Querydsl의 정렬(OrderSpecifier)로 편리하게 변경하는 기능을 제공한다. 
+
+
+
+**스프링 데이터 Sort를 Querydsl의 OrderSpecifier로 변환**
+
+~~~java
+JPAQuery<Member> query = queryFactory.selectFrom(member);
+        
+        for (Sort.Order o : pageable.getSort()) {
+            PathBuilder pathBuilder = new PathBuilder(member.getType(), member.getMetadata());
+            query.orderBy(
+                    new OrderSpecifier(o.isAscending() ? Order.ASC : Order.DESC, pathBuilder.get(o.getProperty()))
+            );
+            List<Member> result = query.fetch();
+~~~
+
+>참고: 정렬( Sort )은 조건이 조금만 복잡해져도 Pageable 의 Sort 기능을 사용하기 어렵다. 루트 엔티티 범위(Join 을 한 범위)를 넘어가는 동적 정렬 기능이 필요하면 스프링 데이터 페이징이 제공하는 Sort 를 사용하기 보다는 파라미터를 받아서 직접 처리하는 것을 권장한다.
+
 #### QuerydslPredicateExecutor
 
 **한계 점**
@@ -1176,6 +1197,20 @@ public class MemberController {
 - 복잡한 실무 환경에서 사용하기에는 한계가 있다.
 
 
+
+#### Querydsl 지원 클래스 직접 만들기
+
+스프링 데이터가 제공하는 `QuerydslRepositorySupport` 가 지닌 한계를 극복하기 위해 직접 Querydsl 지원 클래스를 생성한다.
+
+
+
+**장점**
+
+- 스프링 데이터가 제공하는 페이징을 편리하게 변환
+- 페이징과 카운트 쿼리 분리 가능
+- 스프링 데이터 Sort 지원
+- `select`, `selectFrom()` 으로 시작 가능
+- `EntityManer`, `QueryFactory` 제공
 
 
 
