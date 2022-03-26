@@ -17,6 +17,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.Commit;
 import org.springframework.transaction.annotation.Transactional;
 import study.querydsl.dto.MemberDto;
 import study.querydsl.dto.QMemberDto;
@@ -540,7 +541,7 @@ public class QuerydslBasicTest {
     }
 
     @Test
-    public void findDtoBySetter() throws Exception{
+    public void findDtoBySetter() throws Exception {
         List<MemberDto> result = queryFactory
                 .select(Projections.bean(MemberDto.class,
                         member.username,
@@ -554,7 +555,7 @@ public class QuerydslBasicTest {
     }
 
     @Test
-    public void findDtoByField() throws Exception{
+    public void findDtoByField() throws Exception {
         List<MemberDto> result = queryFactory
                 .select(Projections.fields(MemberDto.class,
                         member.username,
@@ -568,7 +569,7 @@ public class QuerydslBasicTest {
     }
 
     @Test
-    public void findDtoByConstructor() throws Exception{
+    public void findDtoByConstructor() throws Exception {
         List<MemberDto> result = queryFactory
                 .select(Projections.constructor(MemberDto.class,
                         member.username,
@@ -582,7 +583,7 @@ public class QuerydslBasicTest {
     }
 
     @Test
-    public void findUserDto() throws Exception{
+    public void findUserDto() throws Exception {
         QMember memberSub = new QMember("memberSub");
 
         List<UserDto> result = queryFactory
@@ -597,9 +598,9 @@ public class QuerydslBasicTest {
             System.out.println("userDto = " + userDto);
         }
     }
-    
+
     @Test
-    public void findDtoByQueryProjection() throws Exception{
+    public void findDtoByQueryProjection() throws Exception {
         List<MemberDto> result = queryFactory
                 .select(new QMemberDto(member.username, member.age))
                 .from(member)
@@ -611,7 +612,7 @@ public class QuerydslBasicTest {
     }
 
     @Test
-    public void dynamicQueryBooleanBuilder() throws Exception{
+    public void dynamicQueryBooleanBuilder() throws Exception {
         String usernameParam = "member1";
         Integer ageParam = null;
 
@@ -637,7 +638,7 @@ public class QuerydslBasicTest {
     }
 
     @Test
-    public void dynamicQueryWhereParam() throws Exception{
+    public void dynamicQueryWhereParam() throws Exception {
         String usernameParam = "member1";
         Integer ageParam = null;
 
@@ -664,4 +665,41 @@ public class QuerydslBasicTest {
     private BooleanExpression allEq(String usernameCond, Integer ageCond) {
         return usernameEq(usernameCond).and(ageEq(ageCond));
     }
+
+    @Test
+    public void bulkUpdate() throws Exception {
+        long count = queryFactory
+                .update(member)
+                .set(member.username, "비회원")
+                .where(member.age.lt(28))
+                .execute();
+
+        em.flush();
+        em.clear();
+
+        List<Member> result = queryFactory
+                .selectFrom(member)
+                .fetch();
+
+        for (Member member1 : result) {
+            System.out.println("member1 = " + member1);
+        }
+    }
+
+    @Test
+    public void bulkAdd() throws Exception {
+        queryFactory
+                .update(member)
+                .set(member.age, member.age.add(1))
+                .execute();
+    }
+
+    @Test
+    public void bulkDelete() throws Exception {
+        long count = queryFactory
+                .delete(member)
+                .where(member.age.gt(18))
+                .execute();
+    }
+
 }

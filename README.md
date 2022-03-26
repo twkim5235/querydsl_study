@@ -750,11 +750,62 @@ private BooleanExpression allEq(String usernameCond, Integer ageCond) {
 
 
 
+### 수정, 삭제 벌크 연산
+
+~~~java
+@Test
+    @Commit
+    public void bulkUpdate() throws Exception{
+        long count = queryFactory
+                .update(member)
+                .set(member.username, "비회원")
+                .where(member.age.lt(28))
+                .execute();
+
+        em.flush();// 벌크 연산 시 영속성 컨텍스트를 초기화 해준다.
+        em.clear();
+
+        List<Member> result = queryFactory
+                .selectFrom(member)
+                .fetch();
+
+        for (Member member1 : result) {
+            System.out.println("member1 = " + member1);
+        }
+    }
+~~~
+
+- 벌크 연산 시 쿼리를 영속성 컨텍스트의 1차쿼리를 거치는 것이 아닌 바로 DB에 쿼리를 전달한다. 그렇게 되면 엔티티를 조회할 때, DB와 영속성 컨텍스트의 데이터가 다른데, 그때 JPA는 영속성 컨텍스트에 캐싱되어있는 데이터를 우선으로 한다. 
+
+  그렇기 때문에 데이터 싱크를 맞추기 위해선 영속성 컨텍스트를 초기화 해준 뒤, member를 조회한다.
 
 
 
+**더하기**
+
+```java
+@Test
+public void bulkAdd() throws Exception{
+    queryFactory
+            .update(member)
+            .set(member.age, member.age.add(1))
+            .execute();
+}
+```
 
 
+
+**삭제**
+
+```java
+@Test
+public void bulkDelete() throws Exception {
+    long count = queryFactory
+            .delete(member)
+            .where(member.age.gt(18))
+            .execute();
+}
+```
 
 
 
