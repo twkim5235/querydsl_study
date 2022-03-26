@@ -1093,15 +1093,50 @@ public Page<MemberTeamDto> searchPageComplex(MemberSearchCondition condition, Pa
 
 
 
+#### CountQuery 최적화
+
+```java
+@Override
+public Page<MemberTeamDto> searchPageComplex(MemberSearchCondition condition, Pageable pageable) {
+    List<MemberTeamDto> content= queryFactory
+            .select(new QMemberTeamDto(
+                    member.id,
+                    member.username,
+                    member.age,
+                    team.id,
+                    team.name))
+            .from(member)
+            .leftJoin(member.team, team)
+            .where(
+                    usernameEq(condition.getUsername()),
+                    teamNameEq(condition.getTeamName()),
+                    ageGoe(condition.getAgeGoe()),
+                    ageLoe(condition.getAgeLoe())
+            )
+            .offset(pageable.getOffset())
+            .limit(pageable.getPageSize())
+            .fetch();
+
+    JPAQuery<Long> countQuery = queryFactory
+            .select(member.count())
+            .from(member)
+            .leftJoin(member.team, team)
+            .where(
+                    usernameEq(condition.getUsername()),
+                    teamNameEq(condition.getTeamName()),
+                    ageGoe(condition.getAgeGoe()),
+                    ageLoe(condition.getAgeLoe())
+            );
 
 
+    return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
+}
+```
 
-
-
-
-
-
-
+- 스프링 데이터 라이브러리가 제공
+- count 쿼리가 생략 가능한 경우 생략해서 처리
+  - 페이지 시작이면서 컨텐츠 사이즈가 페이지 사이즈보다 작을 때
+  - 마지막 페이지일 때 (offset + 컨텐츠 사이즈를 더해서 전체 사이즈 구함)
 
 
 

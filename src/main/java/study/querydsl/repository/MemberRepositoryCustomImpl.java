@@ -7,6 +7,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.support.PageableExecutionUtils;
 import study.querydsl.dto.MemberDto;
 import study.querydsl.dto.MemberSearchCondition;
 import study.querydsl.dto.MemberTeamDto;
@@ -95,7 +96,7 @@ public class MemberRepositoryCustomImpl implements MemberRepositoryCustom {
                 .limit(pageable.getPageSize())
                 .fetch();
 
-        Long total = queryFactory
+        JPAQuery<Long> countQuery = queryFactory
                 .select(member.count())
                 .from(member)
                 .leftJoin(member.team, team)
@@ -104,10 +105,10 @@ public class MemberRepositoryCustomImpl implements MemberRepositoryCustom {
                         teamNameEq(condition.getTeamName()),
                         ageGoe(condition.getAgeGoe()),
                         ageLoe(condition.getAgeLoe())
-                ).fetchOne();
+                );
 
 
-        return new PageImpl<>(content, pageable, total);
+        return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
     }
 
     private BooleanExpression usernameEq(String username) {
