@@ -927,23 +927,86 @@ private BooleanExpression ageLoe(Integer ageLoe) {
 
 
 
+### 사용자 정의 리포지토리
+
+**사용자 정의 리포지토리 사용법**
+
+1. 사용자 정의 인터페이스 작성
+2. 사용자 정의 인터페이스 구현
+3. 스프링 데이터 레포지토리에 사용자 정의 인터페이스 상속
 
 
 
+**사용자 정의 레포지토리 구성**
 
+![](./picture/사용자_정의_리포지토리.png)
 
+**1. 사용자 정의 인터페이스 레포지토리 작성**
 
+```java
+public interface MemberRepositoryCustom {
+    List<MemberTeamDto> search(MemberSearchCondition condition);
+}
+```
 
+**2.사용자 정의 인터페이스 레포지토리 구현**
 
+```java
+public class MemberRepositoryCustomImpl implements MemberRepositoryCustom {
 
+    private final JPAQueryFactory queryFactory;
 
+    public MemberRepositoryCustomImpl(EntityManager em) {
+        this.queryFactory = new JPAQueryFactory(em);
+    }
 
+    @Override
+    public List<MemberTeamDto> search(MemberSearchCondition condition) {
+        return queryFactory
+                .select(new QMemberTeamDto(
+                        member.id,
+                        member.username,
+                        member.age,
+                        team.id,
+                        team.name))
+                .from(member)
+                .leftJoin(member.team, team)
+                .where(
+                        usernameEq(condition.getUsername()),
+                        teamNameEq(condition.getTeamName()),
+                        ageGoe(condition.getAgeGoe()),
+                        ageLoe(condition.getAgeLoe())
+                )
+                .fetch();
+    }
 
+    private BooleanExpression usernameEq(String username) {
+        return hasText(username) ? member.username.eq(username) : null;
+    }
 
+    private BooleanExpression teamNameEq(String teamName) {
+        return hasText(teamName) ? team.name.eq(teamName) : null;
+    }
 
+    private BooleanExpression ageGoe(Integer ageGoe) {
+        return ageGoe != null ? member.age.goe(ageGoe) : null;
+    }
 
+    private BooleanExpression ageLoe(Integer ageLoe) {
+        return ageLoe != null ? member.age.loe(ageLoe) : null;
+    }
+}
+```
 
+**3. 기존 레포지토리에 사용자정의 레포지토리 상속**
 
+```java
+public interface MemberRepository extends JpaRepository<Member, Long>, MemberRepositoryCustom {
+    List<Member> findByUsername(String username);
+}
+```
+
+- 인터페이스는 다중 상속이 가능하다.
 
 
 
