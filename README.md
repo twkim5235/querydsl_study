@@ -1140,9 +1140,34 @@ public Page<MemberTeamDto> searchPageComplex(MemberSearchCondition condition, Pa
 
 
 
+### 스프링 데이터 페이징 활용3 - 컨트롤러 개발
+
+```java
+public class MemberController {
+
+    private final MemberJpaRepository memberJpaRepository;
+    private final MemberRepository memberRepository;
+
+    @GetMapping("/v1/members")
+    public List<MemberTeamDto> searchMemberV1(MemberSearchCondition condition) {
+        return memberJpaRepository.search(condition);
+    }
+
+    @GetMapping("/v2/members")
+    public Page<MemberTeamDto> searchMemberV2(MemberSearchCondition condition, Pageable pageable) {
+        return memberRepository.searchPageSimple(condition, pageable);
+    }
+
+    @GetMapping("/v3/members")
+    public Page<MemberTeamDto> searchMemberV3(MemberSearchCondition condition, Pageable pageable) {
+        return memberRepository.searchPageComplex(condition, pageable);
+    }
+}
+```
 
 
 
+#### 
 
 
 
