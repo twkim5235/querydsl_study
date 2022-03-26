@@ -372,7 +372,7 @@ JPA JPQL 서브쿼리 한계점으로 from 절의 서브쿼리(인라인 뷰)는
 2. 애플리케이션에서 쿼리를 2번 분리해서 실행한다.
 3. nativeSQL을 사용한다.
 
-### 
+
 
 #### Case 문
 
@@ -469,7 +469,9 @@ h2: 2.0.202 이후 버전 부터는 char로 캐스팅할 때 기본길이가 1�
 
 
 
-### 프로젝션과 결과 반환 - 기본
+### 중급 문법
+
+#### 프로젝션과 결과 반환 - 기본
 
 프로젝션: select 대상 지정
 
@@ -518,29 +520,105 @@ public void tupleProjection() throws Exception{
 }
 ```
 
+- 튜플은 Repository 안에서만 사용하는게 권장된다 왜냐하면 튜플이 querydsl에 종속적인 개념이기 때문에 서비스 또는 컨트롤러로 나갈 시 해당 부분에서 querydsl에 종속적이기 때문에 repository에서만 사용하고 외부로 내보낼 때는 DTO에 담아서 내보내도록 하자
 
 
 
+#### 프로젝션과 결과 반환 - DTO 조회
+
+**순수 JPA에서 DTO 조회 코드**
+
+```java
+@Test
+public void findDtoByJPQL() throws Exception {
+    List<MemberDto> result = em.createQuery("select new study.querydsl.dto.MemberDto(m.username, m.age) from Member m", MemberDto.class)
+            .getResultList();
+
+    for (MemberDto memberDto : result) {
+        System.out.println("memberDto = " + memberDto);
+    }
+}
+```
+
+- 순수 JPA에서 DTO를 조회할 때는 new 명령어를 사용해야함
+- DTO의 package이름을 다 적어줘야해서 지저분함
+- 생성자 방식만 지원함
 
 
 
+**Querydsl 빈 생성(Bean population)**
 
+```java
+@Test
+public void findDtoBySetter() throws Exception{
+    List<MemberDto> result = queryFactory
+            .select(Projections.bean(MemberDto.class,
+                    member.username,
+                    member.age))
+            .from(member)
+            .fetch();
 
+    for (MemberDto memberDto : result) {
+        System.out.println("memberDto = " + memberDto);
+    }
+}
+```
 
+**Querydsl  필드 생성**
 
+```java
+@Test
+public void findDtoByField() throws Exception{
+    List<MemberDto> result = queryFactory
+            .select(Projections.fields(MemberDto.class,
+                    member.username,
+                    member.age))
+            .from(member)
+            .fetch();
 
+    for (MemberDto memberDto : result) {
+        System.out.println("memberDto = " + memberDto);
+    }
+}
+```
 
+**DTO의 필드 이름과 엔티티의 이름이 다를 때는 as를 붙여서 별칭을 DTO에 맞게 지정해줘야 한다.**
 
+```java
+@Test
+public void findUserDto() throws Exception{
+    List<UserDto> result = queryFactory
+            .select(Projections.fields(UserDto.class,
+                    member.username.as("name"),
+                    member.age))
+            .from(member)
+            .fetch();
 
+    for (UserDto userDto : result) {
+        System.out.println("userDto = " + userDto);
+    }
+}
+```
 
+**Querydsl 생성사 생성**
 
+```
+@Test
+public void findDtoByConstructor() throws Exception{
+    List<MemberDto> result = queryFactory
+            .select(Projections.constructor(MemberDto.class,
+                    member.username,
+                    member.age))
+            .from(member)
+            .fetch();
 
+    for (MemberDto memberDto : result) {
+        System.out.println("memberDto = " + memberDto);
+    }
+}
+```
 
-
-
-
-
-
+- 생성자로 생성할 때는 파라미터 타입에 맞춰서 설정해줘야 한다.
 
 
 

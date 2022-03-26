@@ -3,6 +3,8 @@ package study.querydsl.entity;
 import com.querydsl.core.QueryResults;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Expression;
+import com.querydsl.core.types.ExpressionUtils;
+import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
@@ -13,6 +15,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
+import study.querydsl.dto.MemberDto;
+import study.querydsl.dto.UserDto;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -105,7 +109,7 @@ public class QuerydslBasicTest {
     }
 
     @Test
-    public void resultFetch() throws Exception{
+    public void resultFetch() throws Exception {
         List<Member> fetch = queryFactory
                 .selectFrom(member)
                 .fetch();
@@ -162,7 +166,7 @@ public class QuerydslBasicTest {
     }
 
     @Test
-    public void paging1() throws Exception{
+    public void paging1() throws Exception {
         //given //when
         List<Member> result = queryFactory
                 .selectFrom(member)
@@ -176,7 +180,7 @@ public class QuerydslBasicTest {
     }
 
     @Test
-    public void paging2() throws Exception{
+    public void paging2() throws Exception {
         //given //when
         QueryResults<Member> queryResults = queryFactory
                 .selectFrom(member)
@@ -193,7 +197,7 @@ public class QuerydslBasicTest {
     }
 
     @Test
-    public void aggregation() throws Exception{
+    public void aggregation() throws Exception {
         //given //when
         List<Tuple> result = queryFactory
                 .select(
@@ -218,10 +222,11 @@ public class QuerydslBasicTest {
 
     /**
      * 팀의 이름과 각 팀의 평균 연령을 구해라
+     *
      * @throws Exception
      */
     @Test
-    public void group() throws Exception{
+    public void group() throws Exception {
         List<Tuple> result = queryFactory
                 .select(team.name, member.age.avg())
                 .from(member)
@@ -241,10 +246,11 @@ public class QuerydslBasicTest {
 
     /**
      * 팀 A에 소속된 모든 회원 조회
+     *
      * @throws Exception
      */
     @Test
-    public void join() throws Exception{
+    public void join() throws Exception {
         List<Member> result = queryFactory
                 .selectFrom(member)
                 .join(member.team, team)
@@ -261,7 +267,7 @@ public class QuerydslBasicTest {
      * 회원의 이름이 팀 이름과 같은 조회
      */
     @Test
-    public void thetaJoin() throws Exception{
+    public void thetaJoin() throws Exception {
         em.persist(new Member("teamA"));
         em.persist(new Member("teamB"));
         em.persist(new Member("teamC"));
@@ -280,10 +286,11 @@ public class QuerydslBasicTest {
     /**
      * 예) 회원과 팀을 조인하면서, 팀 이름이 teamA인 팀만 조인, 회원은 모두 조회
      * JPQL: select m, t from Member m left join m.team on t.name ='teamA'
+     *
      * @throws Exception
      */
     @Test
-    public void joinOnFiltering() throws Exception{
+    public void joinOnFiltering() throws Exception {
         List<Tuple> result = queryFactory
                 .select(member, team)
                 .from(member)
@@ -298,10 +305,11 @@ public class QuerydslBasicTest {
 
     /**
      * 연관관계가 없는 엔티티 외부 조인
+     *
      * @throws Exception
      */
     @Test
-    public void joinOnNoRelation() throws Exception{
+    public void joinOnNoRelation() throws Exception {
         em.persist(new Member("teamA"));
         em.persist(new Member("teamB"));
         em.persist(new Member("teamC"));
@@ -321,7 +329,7 @@ public class QuerydslBasicTest {
     EntityManagerFactory emf;
 
     @Test
-    public void fetchJoinNo() throws Exception{
+    public void fetchJoinNo() throws Exception {
         em.flush();
         em.clear();
 
@@ -335,7 +343,7 @@ public class QuerydslBasicTest {
     }
 
     @Test
-    public void fetchJoinUse() throws Exception{
+    public void fetchJoinUse() throws Exception {
         em.flush();
         em.clear();
 
@@ -351,10 +359,11 @@ public class QuerydslBasicTest {
 
     /**
      * 나이가 가장 많은 회원 조회
+     *
      * @throws Exception
      */
     @Test
-    public void subQuery() throws Exception{
+    public void subQuery() throws Exception {
         QMember memberSub = new QMember("memberSub");
 
         List<Member> result = queryFactory
@@ -371,10 +380,11 @@ public class QuerydslBasicTest {
 
     /**
      * 나이가 평균 이상인 회원
+     *
      * @throws Exception
      */
     @Test
-    public void subQueryGoe() throws Exception{
+    public void subQueryGoe() throws Exception {
         QMember memberSub = new QMember("memberSub");
 
         List<Member> result = queryFactory
@@ -391,10 +401,11 @@ public class QuerydslBasicTest {
 
     /**
      * 나이가 10살 초과인 회원 조회
+     *
      * @throws Exception
      */
     @Test
-    public void subQueryIn() throws Exception{
+    public void subQueryIn() throws Exception {
         QMember memberSub = new QMember("memberSub");
 
         List<Member> result = queryFactory
@@ -412,10 +423,11 @@ public class QuerydslBasicTest {
 
     /**
      * 나이가 가장 많은 회원 조회
+     *
      * @throws Exception
      */
     @Test
-    public void selectSubQuery() throws Exception{
+    public void selectSubQuery() throws Exception {
         QMember memberSub = new QMember("memberSub");
 
         List<Tuple> result = queryFactory
@@ -431,7 +443,7 @@ public class QuerydslBasicTest {
     }
 
     @Test
-    public void basicCase() throws Exception{
+    public void basicCase() throws Exception {
         List<String> result = queryFactory
                 .select(member.age
                         .when(10).then("열살")
@@ -459,9 +471,9 @@ public class QuerydslBasicTest {
             System.out.println("s = " + s);
         }
     }
-    
+
     @Test
-    public void constant() throws Exception{
+    public void constant() throws Exception {
         List<Tuple> result = queryFactory
                 .select(member.username, Expressions.constant("A"))
                 .from(member)
@@ -473,7 +485,7 @@ public class QuerydslBasicTest {
     }
 
     @Test
-    public void concat() throws Exception{
+    public void concat() throws Exception {
         List<String> result = queryFactory
                 .select(member.username.concat("_").concat(member.age.stringValue()))
                 .from(member)
@@ -486,7 +498,7 @@ public class QuerydslBasicTest {
     }
 
     @Test
-    public void simpleProjection() throws Exception{
+    public void simpleProjection() throws Exception {
         List<String> result = queryFactory
                 .select(member.username)
                 .from(member)
@@ -498,7 +510,7 @@ public class QuerydslBasicTest {
     }
 
     @Test
-    public void tupleProjection() throws Exception{
+    public void tupleProjection() throws Exception {
         List<Tuple> result = queryFactory
                 .select(member.username, member.age)
                 .from(member)
@@ -510,6 +522,75 @@ public class QuerydslBasicTest {
 
             System.out.println("username = " + username);
             System.out.println("age = " + age);
+        }
+    }
+
+    @Test
+    public void findDtoByJPQL() throws Exception {
+        List<MemberDto> result = em.createQuery("select new study.querydsl.dto.MemberDto(m.username, m.age) from Member m", MemberDto.class)
+                .getResultList();
+
+        for (MemberDto memberDto : result) {
+            System.out.println("memberDto = " + memberDto);
+        }
+    }
+
+    @Test
+    public void findDtoBySetter() throws Exception{
+        List<MemberDto> result = queryFactory
+                .select(Projections.bean(MemberDto.class,
+                        member.username,
+                        member.age))
+                .from(member)
+                .fetch();
+
+        for (MemberDto memberDto : result) {
+            System.out.println("memberDto = " + memberDto);
+        }
+    }
+
+    @Test
+    public void findDtoByField() throws Exception{
+        List<MemberDto> result = queryFactory
+                .select(Projections.fields(MemberDto.class,
+                        member.username,
+                        member.age))
+                .from(member)
+                .fetch();
+
+        for (MemberDto memberDto : result) {
+            System.out.println("memberDto = " + memberDto);
+        }
+    }
+
+    @Test
+    public void findDtoByConstructor() throws Exception{
+        List<MemberDto> result = queryFactory
+                .select(Projections.constructor(MemberDto.class,
+                        member.username,
+                        member.age))
+                .from(member)
+                .fetch();
+
+        for (MemberDto memberDto : result) {
+            System.out.println("memberDto = " + memberDto);
+        }
+    }
+
+    @Test
+    public void findUserDto() throws Exception{
+        QMember memberSub = new QMember("memberSub");
+
+        List<UserDto> result = queryFactory
+                .select(Projections.fields(UserDto.class,
+                        member.username.as("name"),
+                        ExpressionUtils.as(JPAExpressions
+                                .select(memberSub.age.max()).from(memberSub), "age")))
+                .from(QMember.member)
+                .fetch();
+
+        for (UserDto userDto : result) {
+            System.out.println("userDto = " + userDto);
         }
     }
 }
