@@ -622,5 +622,82 @@ public void findDtoByConstructor() throws Exception{
 
 
 
+#### 프로젝션과 결과 반환 - @QueryProjection
+
+**생성자 + @QueryProjection**
+
+```java
+@Data
+@NoArgsConstructor
+public class MemberDto {
+    private String username;
+    private int age;
+
+    @QueryProjection
+    public MemberDto(String username, int age) {
+        this.username = username;
+        this.age = age;
+    }
+}
+```
+
+
+
+```java
+@Test
+public void findDtoByQueryProjection() throws Exception{
+    List<MemberDto> result = queryFactory
+            .select(new QMemberDto(member.username, member.age))
+            .from(member)
+            .fetch();
+
+    for (MemberDto memberDto : result) {
+        System.out.println("memberDto = " + memberDto);
+    }
+}
+```
+
+생성자 시점에 타입도 정해주고, 파라미터도 알맞게 맞아줘서 컴파일 시점에 오류가 발생해서 정말 좋지만,
+
+단점이 하나가 존재하는데 DTO가 Querydsl에 종속적이기 때문에 DTO를 컨트롤러, 서비스 같은곳에서 쓰인다면 모든 곳에서 querydsl에 종속적으로 변하기 때문에 아키텍쳐를 설계할 때 고민을 해보는 것도 좋을것 같다.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
