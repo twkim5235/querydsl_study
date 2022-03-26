@@ -467,3 +467,82 @@ h2: 2.0.202 이후 버전 부터는 char로 캐스팅할 때 기본길이가 1�
 
 >  참고 `member.age.stringValue()` 부분이 중요한데, 문자가 아닌 다른 타입들을 `stringValue()`로 문자로 변환할 수 있따. 이 방법은 ENUM을 처리할 때도 자주 사용한다.
 
+
+
+### 프로젝션과 결과 반환 - 기본
+
+프로젝션: select 대상 지정
+
+
+
+#### 프로젝션 대상이 하나
+
+- 프로젝션 대상이 하나면 타입을 명확하게 지정할 수 있음
+- 프로젝션 대상이 둘 이상이면 튜플이나 DTO로 조회
+
+```java
+@Test
+public void simpleProjection() throws Exception{
+    List<String> result = queryFactory
+            .select(member.username)
+            .from(member)
+            .fetch();
+
+    for (String s : result) {
+        System.out.println("s = " + s);
+    }
+}
+```
+
+
+
+#### 튜플 조회
+
+프로젝션 대상이 둘 이상일 때 사용
+
+```java
+@Test
+public void tupleProjection() throws Exception{
+    List<Tuple> result = queryFactory
+            .select(member.username, member.age)
+            .from(member)
+            .fetch();
+
+    for (Tuple tuple : result) {
+        String username = tuple.get(member.username);
+        Integer age = tuple.get(member.age);
+
+        System.out.println("username = " + username);
+        System.out.println("age = " + age);
+    }
+}
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
