@@ -1167,11 +1167,13 @@ public class MemberController {
 
 
 
-#### 
+#### QuerydslPredicateExecutor
 
+**한계 점**
 
-
-
+- 조인 X(묵시적 조인은 가능하지만 left join이 불가능하다)
+- 클라이언트가 Querydsl에 의존해야 한다. 서비스 클래스가 Querydsl 이라는 구현 기술에 의존해야한다.
+- 복잡한 실무 환경에서 사용하기에는 한계가 있다.
 
 
 
