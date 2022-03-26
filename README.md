@@ -809,9 +809,42 @@ public void bulkDelete() throws Exception {
 
 
 
+#### SQL function 호출
 
+```java
+@Test
+    public void sqlFunction() throws Exception{
+        List<String> result = queryFactory
+                .select(
+                        Expressions.stringTemplate(
+                                "function('replace', {0}, {1}, {2})",
+                                member.username, "member", "M")
+                ).from(member)
+                .fetch();
 
+        for (String s : result) {
+            System.out.println("s = " + s);
+        }
+    }
 
+    @Test
+    public void sqlFunction2() throws Exception{
+        List<String> result = queryFactory
+                .select(member.username)
+                .from(member)
+//                .where(member.username.eq(Expressions.stringTemplate("function('lower', {0})", member.username)))
+                .where(member.username.eq(member.username.lower()))// 기본적으로 querydsl이 내장하고 있다.
+                .fetch();
+
+        for (String s : result) {
+            System.out.println("s = " + s);
+        }
+    }
+```
+
+Expressions를 사용하여 SQL function을 호출하면된다.
+
+그리고 기본적으로 querydsl에서 내장하는 ANSI표준 function들은 entity.filed.function()이런식으로 호출하면 된다.
 
 
 
