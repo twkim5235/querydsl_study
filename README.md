@@ -848,6 +848,38 @@ Expressions를 사용하여 SQL function을 호출하면된다.
 
 
 
+#### BooleanBuilder를 이용한 동적쿼리와 성능 최적화 조회
+
+```java
+public List<MemberTeamDto> searchByBuilder(MemberSearchCondition condition) {
+    BooleanBuilder builder = new BooleanBuilder();
+    if (hasText(condition.getUsername())) {
+        builder.and(member.username.eq(condition.getUsername()));
+    }
+    if(hasText(condition.getTeamName())){
+        builder.and(team.name.eq(condition.getTeamName()));
+    }
+    if (condition.getAgeGoe() != null) {
+        builder.and(member.age.goe(condition.getAgeGoe()));
+    }
+    if (condition.getAgeLoe() != null) {
+        builder.and(member.age.loe(condition.getAgeLoe()));
+    }
+
+    return queryFactory
+            .select(new QMemberTeamDto(
+                    member.id,
+                    member.username,
+                    member.age,
+                    team.id,
+                    team.name))
+            .from(member)
+            .leftJoin(member.team, team)
+            .where(builder)
+            .fetch();
+}
+```
+
 
 
 
