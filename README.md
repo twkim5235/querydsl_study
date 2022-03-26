@@ -1010,9 +1010,86 @@ public interface MemberRepository extends JpaRepository<Member, Long>, MemberRep
 
 
 
+### 스프링 데이터 페이징 활용
+
+- 스프링 데이터의 Page, Pageable을 활용해보자
+- 전체 카운트를 한번에 조회하는 단순한 방법
+- 데이터 내용과 전체카운트를 별도로 조회하는 방법
 
 
 
+**사용자 정의 인터페이스에 페이징 2가지 추가**
+
+1. 전체 카운트를 한번에 조회하는 단순한 방법
+
+   ```java
+   @Override
+   public Page<MemberTeamDto> searchPageSimple(MemberSearchCondition condition, Pageable pageable) {
+       QueryResults<MemberTeamDto> results = queryFactory
+               .select(new QMemberTeamDto(
+                       member.id,
+                       member.username,
+                       member.age,
+                       team.id,
+                       team.name))
+               .from(member)
+               .leftJoin(member.team, team)
+               .where(
+                       usernameEq(condition.getUsername()),
+                       teamNameEq(condition.getTeamName()),
+                       ageGoe(condition.getAgeGoe()),
+                       ageLoe(condition.getAgeLoe())
+               )
+               .offset(pageable.getOffset())
+               .limit(pageable.getPageSize())
+               .fetchResults();
+   
+       List<MemberTeamDto> content = results.getResults();
+       long total = results.getTotal();
+   
+       return new PageImpl<>(content, pageable, total);
+   }
+   ```
+
+2. 데이터 내용과 전체카운트를 별도로 조회하는 방법
+
+```java
+@Override
+public Page<MemberTeamDto> searchPageComplex(MemberSearchCondition condition, Pageable pageable) {
+    List<MemberTeamDto> content= queryFactory
+            .select(new QMemberTeamDto(
+                    member.id,
+                    member.username,
+                    member.age,
+                    team.id,
+                    team.name))
+            .from(member)
+            .leftJoin(member.team, team)
+            .where(
+                    usernameEq(condition.getUsername()),
+                    teamNameEq(condition.getTeamName()),
+                    ageGoe(condition.getAgeGoe()),
+                    ageLoe(condition.getAgeLoe())
+            )
+            .offset(pageable.getOffset())
+            .limit(pageable.getPageSize())
+            .fetch();
+
+    Long total = queryFactory
+            .select(member.count())
+            .from(member)
+            .leftJoin(member.team, team)
+            .where(
+                    usernameEq(condition.getUsername()),
+                    teamNameEq(condition.getTeamName()),
+                    ageGoe(condition.getAgeGoe()),
+                    ageLoe(condition.getAgeLoe())
+            ).fetchOne();
+
+
+    return new PageImpl<>(content, pageable, total);
+}
+```
 
 
 
