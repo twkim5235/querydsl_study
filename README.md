@@ -923,9 +923,7 @@ private BooleanExpression ageLoe(Integer ageLoe) {
 }
 ```
 
-많은 조건들을 조립해서 쓸 수 있기 때문에 추천되는 방법이다.
-
-
+**많은 조건들을 조립해서 쓸 수 있기 때문에 추천되는 방법이다.**
 
 
 
